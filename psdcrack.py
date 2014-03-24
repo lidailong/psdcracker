@@ -5,18 +5,45 @@
 #
 import crypt
 
-f = open('/etc/shadow', 'r')
-for i in f:
-        if 'root' in i:
-        s = i
-        break
-shadow = s.split(":")[1]
-print "root:"
-print shadow
-mode = shadow[0:3]
-        if mode == "$6$":
-        print "Sha1-512 crypt"
-        salt = "$6$" + shadow.split("$")[2]
-        password = 'ThisIsPassword'
-        result = crypt.crypt(password, salt)
-        print result
+def testPass(cryptPass):
+	cryptMode = cryptPass[0:3]
+	if cryptMode == '$6$':
+		salt = '$6$' + cryptPass.split('$')[2]
+	dictFile = open('dictionary.txt', 'r')
+	for word in dictFile.readlines():
+		word = word.strip('\n')
+		cryptWord = crypt.crypt(word, salt)
+		if (cryptWord == cryptPass):
+			print "[+] Found Password: " + word + "\n"
+			return
+	print "[-] Password Not Found.\n"
+	return
+
+def main():
+	passFile = open('/etc/shadow')
+	for line in passFile.readlines():
+		if 'root' in line:
+			cryptPass = line.split(':')[1]
+			break
+	print 'crypt root password is : '
+	print cryptPass
+	testPass(cryptPass)
+	
+
+if __name__ == "__main__":
+	main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
